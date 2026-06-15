@@ -1,0 +1,23 @@
+{
+  "name": "閃電貸",
+  "description": "P2P 借貸平台",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "value": "production"
+    },
+    "DATABASE_URL": {
+      "description": "MySQL 資料庫連線字串",
+      "required": true
+    },
+    "JWT_SECRET": {
+      "description": "Session 簽名密鑰（隨機長字串）",
+      "required": true,
+      "generator": "secret"
+    }
+  }
+}
