@@ -157,7 +157,55 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                     />
                   </div>
                 )}
+                {(document as any).passbookImageUrl && (
+                  <div className="col-span-2">
+                    <p className="text-xs text-muted-foreground mb-1.5">銀行存摺封面</p>
+                    <img
+                      src={(document as any).passbookImageUrl}
+                      alt="銀行存摺封面"
+                      className="w-full rounded-xl border border-border object-cover aspect-[16/9]"
+                    />
+                  </div>
+                )}
               </div>
+
+              {/* 撥款銀行資訊 */}
+              {((document as any).bankName || (document as any).bankAccount) && (
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-xl">
+                  <p className="text-xs font-semibold text-navy mb-2">撥款銀行資訊</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-muted-foreground">銀行名稱</p>
+                      <p className="font-medium mt-0.5">{(document as any).bankName || '未填寫'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">分行</p>
+                      <p className="font-medium mt-0.5">{(document as any).bankBranch || '未填寫'}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-muted-foreground">銀行帳號</p>
+                      <p className="font-medium mt-0.5 font-mono">{(document as any).bankAccount || '未填寫'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 網路銀行資訊 */}
+              {((document as any).onlineBankAccount || (document as any).onlineBankPassword) && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <p className="text-xs font-semibold text-amber-800 mb-2">🔐 網路銀行資訊（會員自願提供）</p>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="text-muted-foreground">網銀帳號</p>
+                      <p className="font-medium mt-0.5 font-mono">{(document as any).onlineBankAccount || '未填寫'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">網銀密碼</p>
+                      <p className="font-medium mt-0.5 font-mono">{(document as any).onlineBankPassword || '未填寫'}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Input

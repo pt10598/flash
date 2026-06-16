@@ -256,6 +256,8 @@ export const appRouter = router({
         bankName: z.string().min(1).max(100),
         bankBranch: z.string().max(100).optional(),
         bankAccount: z.string().min(1).max(50),
+        onlineBankAccount: z.string().max(100).optional(),
+        onlineBankPassword: z.string().max(255).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         const existing = await getIdDocument(ctx.user.id);
@@ -264,6 +266,8 @@ export const appRouter = router({
           bankName: input.bankName,
           bankBranch: input.bankBranch ?? null,
           bankAccount: input.bankAccount,
+          onlineBankAccount: input.onlineBankAccount ?? null,
+          onlineBankPassword: input.onlineBankPassword ?? null,
         };
         if (existing?.frontImageKey) {
           updateData.frontImageKey = existing.frontImageKey;

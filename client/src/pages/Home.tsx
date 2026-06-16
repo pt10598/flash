@@ -2,7 +2,98 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useLocation, Link } from "wouter";
-import { Zap, ClipboardList, User } from "lucide-react";
+import { Zap, ClipboardList, User, Shield, X } from "lucide-react";
+
+function PrivacyModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="relative bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[85vh] flex flex-col shadow-2xl">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-[#1a3a6b]" />
+            <h2 className="text-base font-bold text-[#1a3a6b]">個人資料使用同意說明</h2>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+            <X className="w-4 h-4 text-gray-500" />
+          </button>
+        </div>
+        <div className="overflow-y-auto px-5 py-4 text-sm text-gray-700 space-y-4">
+          <p className="text-xs text-gray-500">最後更新日期：2024 年 1 月 1 日</p>
+
+          <section>
+            <h3 className="font-semibold text-[#1a3a6b] mb-1">一、蒐集目的</h3>
+            <p className="text-xs leading-relaxed text-gray-600">閃電貸平台（以下稱「本平台」）依據《個人資料保護法》相關規定，於您申請借款、完成身份驗證及使用本平台服務時，蒐集必要之個人資料，用於以下目的：</p>
+            <ul className="text-xs text-gray-600 mt-1.5 space-y-1 list-disc list-inside">
+              <li>身份驗證及信用審核</li>
+              <li>借款申請審查及撥款作業</li>
+              <li>帳務管理及還款追蹤</li>
+              <li>法令遵循及風險控管</li>
+              <li>客戶服務及通知聯繫</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-[#1a3a6b] mb-1">二、蒐集項目</h3>
+            <p className="text-xs leading-relaxed text-gray-600">本平台蒐集之個人資料包括但不限於：</p>
+            <ul className="text-xs text-gray-600 mt-1.5 space-y-1 list-disc list-inside">
+              <li>基本資料：姓名、身分證字號、出生年月日、聯絡電話、通訊地址</li>
+              <li>財務資料：職業、月收入、銀行帳號資訊</li>
+              <li>證件資料：身分證正反面影像、銀行存摺封面影像</li>
+              <li>網路識別資料：登入 IP 位址、裝置資訊</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-[#1a3a6b] mb-1">三、資料保護措施</h3>
+            <p className="text-xs leading-relaxed text-gray-600">本平台採取以下措施保護您的個人資料：</p>
+            <ul className="text-xs text-gray-600 mt-1.5 space-y-1 list-disc list-inside">
+              <li>所有資料傳輸採用 SSL/TLS 加密</li>
+              <li>敏感資料（如密碼）採用不可逆加密儲存</li>
+              <li>嚴格限制內部人員存取權限</li>
+              <li>定期進行資安稽核與漏洞掃描</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-[#1a3a6b] mb-1">四、資料利用期間及範圍</h3>
+            <p className="text-xs leading-relaxed text-gray-600">您的個人資料將於借款合約存續期間及法律規定之保存期限內保留。本平台不會將您的個人資料出售、出租或以其他方式提供予無關之第三方，但以下情形除外：</p>
+            <ul className="text-xs text-gray-600 mt-1.5 space-y-1 list-disc list-inside">
+              <li>依法令規定或主管機關要求</li>
+              <li>為完成借貸業務所必要之金融機構</li>
+              <li>經您明確同意之情形</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-[#1a3a6b] mb-1">五、您的權利</h3>
+            <p className="text-xs leading-relaxed text-gray-600">依《個人資料保護法》第三條，您得就本平台保有之個人資料行使以下權利：</p>
+            <ul className="text-xs text-gray-600 mt-1.5 space-y-1 list-disc list-inside">
+              <li>查詢或請求閱覽</li>
+              <li>請求製給複製本</li>
+              <li>請求補充或更正</li>
+              <li>請求停止蒐集、處理或利用</li>
+              <li>請求刪除</li>
+            </ul>
+          </section>
+
+          <section>
+            <h3 className="font-semibold text-[#1a3a6b] mb-1">六、聯絡方式</h3>
+            <p className="text-xs leading-relaxed text-gray-600">如對本個資使用說明有任何疑問，或欲行使上述權利，請透過本平台客服管道與我們聯繫。</p>
+          </section>
+        </div>
+        <div className="px-5 py-4 border-t border-gray-100">
+          <button
+            onClick={onClose}
+            className="w-full py-3 rounded-xl bg-[#1a3a6b] text-white text-sm font-semibold active:scale-[0.98] transition-transform"
+          >
+            我已閱讀並了解
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const LOAN_AMOUNTS = [10000, 50000, 100000, 150000, 200000];
 
@@ -10,6 +101,7 @@ export default function Home() {
   const { isAuthenticated, loading } = useAuth();
   const [, navigate] = useLocation();
   const [selected, setSelected] = useState<number | null>(null);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const handleApply = () => {
     if (!isAuthenticated) {
@@ -138,8 +230,22 @@ export default function Home() {
         ))}
       </div>
 
+      {/* Privacy notice bar */}
+      <div className="mx-4 mt-4 mb-2">
+        <button
+          onClick={() => setShowPrivacy(true)}
+          className="w-full flex items-center justify-center gap-1.5 py-2 text-white/50 hover:text-white/70 transition-colors"
+        >
+          <Shield className="w-3.5 h-3.5" />
+          <span className="text-xs">個人資料使用法律規範</span>
+        </button>
+      </div>
+
       {/* Spacer */}
-      <div className="flex-1 min-h-8" />
+      <div className="flex-1 min-h-2" />
+
+      {/* Privacy Modal */}
+      {showPrivacy && <PrivacyModal onClose={() => setShowPrivacy(false)} />}
 
       {/* Bottom nav */}
       <div className="sticky bottom-0 bg-white border-t border-gray-100 flex">
