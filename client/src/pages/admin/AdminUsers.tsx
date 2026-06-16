@@ -13,6 +13,9 @@ import {
   XCircle,
   Eye,
   X,
+  Snowflake,
+  Trash2,
+  ShieldCheck,
 } from "lucide-react";
 
 const DOC_STATUS_CONFIG = {
@@ -28,6 +31,25 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
   const [reviewNote, setReviewNote] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [showResetPwd, setShowResetPwd] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const setUserStatusMutation = trpc.admin.setUserStatus.useMutation({
+    onSuccess: (_, vars) => {
+      toast.success(vars.status === 'frozen' ? '帳號已凍結' : '帳號已解凍');
+      utils.admin.userDetail.invalidate({ userId });
+      utils.admin.users.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const deleteUserMutation = trpc.admin.deleteUser.useMutation({
+    onSuccess: () => {
+      toast.success('會員已刪除');
+      utils.admin.users.invalidate();
+      onClose();
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   const resetPasswordMutation = trpc.admin.resetUserPassword.useMutation({
     onSuccess: () => {
@@ -168,6 +190,68 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
               </div>
             </div>
           )}
+
+          {/* Account Actions */}
+          <div>
+            <h3 className="text-sm font-semibold text-navy mb-3">帳號管理</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+              <div className="bg-secondary/40 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">帳號狀態</p>
+                <p className={`font-medium mt-0.5 ${user.status === 'frozen' ? 'text-red-600' : 'text-emerald-600'}`}>
+                  {user.status === 'frozen' ? '🔒 已凍結' : '✅ 正常'}
+                </p>
+              </div>
+              <div className="bg-secondary/40 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">最後登入 IP</p>
+                <p className="font-medium mt-0.5 font-mono text-xs">{(user as any).lastLoginIp || '尚未記錄'}</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {user.status === 'frozen' ? (
+                <Button
+                  size="sm"
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={() => setUserStatusMutation.mutate({ userId: user.id, status: 'active' })}
+                  disabled={setUserStatusMutation.isPending}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
+                  解凍帳號
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50"
+                  onClick={() => setUserStatusMutation.mutate({ userId: user.id, status: 'frozen' })}
+                  disabled={setUserStatusMutation.isPending}
+                >
+                  <Snowflake className="w-3.5 h-3.5 mr-1.5" />
+                  凍結帳號
+                </Button>
+              )}
+              {!confirmDelete ? (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                  onClick={() => setConfirmDelete(true)}
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                  刪除帳號
+                </Button>
+              ) : (
+                <Button
+                  size="sm"
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() => deleteUserMutation.mutate({ userId: user.id })}
+                  disabled={deleteUserMutation.isPending}
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+                  確認刪除
+                </Button>
+              )}
+            </div>
+          </div>
 
           {/* Reset Password */}
           {user.phone && (

@@ -31,6 +31,9 @@ import {
   createRepayment,
   getRepaymentsByLoan,
   updateRepayment,
+  updateUserStatus,
+  updateUserLastLoginIp,
+  deleteUser,
 } from "./db";
 
 // Admin guard middleware
@@ -90,6 +93,13 @@ export const appRouter = router({
         if (!valid) {
           throw new TRPCError({ code: "UNAUTHORIZED", message: "手機號碼或密碼錯誤" });
         }
+        // 檢查帳號是否被凍結
+        if (user.status === 'frozen') {
+          throw new TRPCError({ code: "FORBIDDEN", message: "此帳號已被凍結，請聯繫客服" });
+        }
+        // 記錄登入 IP
+        const ip = (ctx.req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || ctx.req.socket?.remoteAddress || '';
+        await updateUserLastLoginIp(user.id, ip);
         // 建立 session
         const token = await sdk.createSessionToken(user.openId, { name: user.name ?? "" });
         const cookieOptions = getSessionCookieOptions(ctx.req);
@@ -359,6 +369,30 @@ export const appRouter = router({
           notes: input.notes,
           recordedBy: ctx.user.id,
         });
+        return { success: true };
+      }),
+
+    setUserStatus: adminProcedure
+      .input(z.object({
+        userId: z.number(),
+        status: z.enum(['active', 'frozen']),
+      }))
+      .mutation(async ({ input }) => {
+        const allUsers = await getAllUsers();
+        const user = allUsers.find(u => u.id === input.userId);
+        if (!user) throw new TRPCError({ code: 'NOT_FOUND', message: '找不到該會員' });
+        await updateUserStatus(input.userId, input.status);
+        return { success: true };
+      }),
+
+    deleteUser: adminProcedure
+      .input(z.object({ userId: z.number() }))
+      .mutation(async ({ input }) => {
+        const allUsers = await getAllUsers();
+        const user = allUsers.find(u => u.id === input.userId);
+        if (!user) throw new TRPCError({ code: 'NOT_FOUND', message: '找不到該會員' });
+        if (user.role === 'admin') throw new TRPCError({ code: 'FORBIDDEN', message: '無法刪除管理員帳號' });
+        await deleteUser(input.userId);
         return { success: true };
       }),
 

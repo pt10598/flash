@@ -72,6 +72,24 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
+export async function updateUserStatus(userId: number, status: 'active' | 'frozen') {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ status }).where(eq(users.id, userId));
+}
+
+export async function updateUserLastLoginIp(userId: number, ip: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ lastLoginIp: ip, lastSignedIn: new Date() }).where(eq(users.id, userId));
+}
+
+export async function deleteUser(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db.delete(users).where(eq(users.id, userId));
+}
+
 export async function getUserByPhone(phone: string) {
   const db = await getDb();
   if (!db) return undefined;
