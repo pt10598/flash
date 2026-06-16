@@ -9,6 +9,7 @@ import { notifyOwner } from "./_core/notification";
 import { storagePut } from "./storage";
 import type { InsertIdDocument } from "../drizzle/schema";
 import bcrypt from "bcryptjs";
+import { notifyNewUser, notifyProfileUpdated, notifyDocumentUploaded, notifyLoanApplication } from "./email";
 import {
   upsertUser,
   getUserByOpenId,
@@ -230,6 +231,11 @@ export const appRouter = router({
           updateData.backImageUrl = existing.backImageUrl ?? "";
         }
         await createOrUpdateIdDocument(updateData);
+        // Email 通知管理員（存摺上傳）
+        try {
+          const userObj = await getUserById(ctx.user.id);
+          await notifyDocumentUploaded(userObj?.phone ?? '', 'passbook');
+        } catch (e) { console.warn('[Email] notify failed:', e); }
         return { success: true, url };
       }),
 
@@ -287,7 +293,12 @@ export const appRouter = router({
           status: "待審核",
         });
 
-        // 通知管理員
+        // Email 通知管理員
+        try {
+          const userObj = await getUserById(ctx.user.id);
+          await notifyLoanApplication(userObj?.phone ?? '', Number(input.loanAmount), input.purpose);
+        } catch (e) { console.warn('[Email] notify failed:', e); }
+        // Manus 通知管理員
         try {
           await notifyOwner({
             title: "📋 新借貸申請",
