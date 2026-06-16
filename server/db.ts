@@ -127,6 +127,12 @@ export async function getAllUsers() {
   return db.select().from(users).orderBy(desc(users.createdAt));
 }
 
+export async function getUsersByRole(role: 'user' | 'admin') {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(users).where(eq(users.role, role)).orderBy(desc(users.createdAt));
+}
+
 // ─── User Profiles ────────────────────────────────────────────────────────────
 
 export async function getUserProfile(userId: number) {

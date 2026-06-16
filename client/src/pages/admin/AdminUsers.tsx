@@ -386,7 +386,7 @@ export default function AdminUsers() {
                         <div className="text-xs text-muted-foreground">{u.email}</div>
                       </td>
                       <td className="px-5 py-4 text-muted-foreground">
-                        {u.profile?.phone || "—"}
+                        {u.phone || u.profile?.phone || "—"}
                       </td>
                       <td className="px-5 py-4">
                         {u.profile?.profileCompleted === "complete" ? (

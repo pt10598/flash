@@ -16,6 +16,7 @@ import {
   createUserWithPhone,
   getUserById,
   getAllUsers,
+  getUsersByRole,
   getUserProfile,
   upsertUserProfile,
   getIdDocument,
@@ -254,25 +255,29 @@ export const appRouter = router({
   // ─── Admin ─────────────────────────────────────────────────────────────────
   admin: router({
     stats: adminProcedure.query(async () => {
-      const [users, loans] = await Promise.all([
-        getAllUsers(),
+      const [regularUsers, loans] = await Promise.all([
+        getUsersByRole('user'),
         getLoanStats(),
       ]);
       return {
-        totalUsers: users.length,
+        totalUsers: regularUsers.length,
         ...loans,
       };
     }),
 
     users: adminProcedure.query(async () => {
-      const allUsers = await getAllUsers();
-      const profiles = await Promise.all(allUsers.map(u => getUserProfile(u.id)));
-      const docs = await Promise.all(allUsers.map(u => getIdDocument(u.id)));
-      return allUsers.map((u, i) => ({
+      const regularUsers = await getUsersByRole('user');
+      const profiles = await Promise.all(regularUsers.map(u => getUserProfile(u.id)));
+      const docs = await Promise.all(regularUsers.map(u => getIdDocument(u.id)));
+      return regularUsers.map((u, i) => ({
         ...u,
         profile: profiles[i] ?? null,
         document: docs[i] ?? null,
       }));
+    }),
+
+    admins: adminProcedure.query(async () => {
+      return getUsersByRole('admin');
     }),
 
     userDetail: adminProcedure
