@@ -21,6 +21,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLoans, { AdminLoanDetail } from "./pages/admin/AdminLoans";
 import AdminRepayments from "./pages/admin/AdminRepayments";
+import AdminLogin from "./pages/admin/AdminLogin";
 
 function Router() {
   return (
@@ -44,11 +45,12 @@ function Router() {
       </Route>
 
       {/* Admin */}
-      <Route path="/admin" component={AdminDashboard} />
-      <Route path="/admin/users" component={AdminUsers} />
-      <Route path="/admin/loans" component={AdminLoans} />
-      <Route path="/admin/loans/:id" component={AdminLoanDetail} />
-      <Route path="/admin/repayments" component={AdminRepayments} />
+      <Route path="/adminmanagebackstage/login" component={AdminLogin} />
+      <Route path="/adminmanagebackstage" component={AdminDashboard} />
+      <Route path="/adminmanagebackstage/users" component={AdminUsers} />
+      <Route path="/adminmanagebackstage/loans" component={AdminLoans} />
+      <Route path="/adminmanagebackstage/loans/:id" component={AdminLoanDetail} />
+      <Route path="/adminmanagebackstage/repayments" component={AdminRepayments} />
 
       {/* Login fallback (when OAuth not configured) */}
       <Route path="/login" component={Login} />

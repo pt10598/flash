@@ -5,10 +5,10 @@ import { LogOut, Zap, LayoutDashboard, Users, FileText, CreditCard, Receipt } fr
 import { getLoginUrl } from "@/const";
 
 const ADMIN_NAV = [
-  { href: "/admin", icon: LayoutDashboard, label: "儀表板" },
-  { href: "/admin/users", icon: Users, label: "會員管理" },
-  { href: "/admin/loans", icon: CreditCard, label: "借款審核" },
-  { href: "/admin/repayments", icon: Receipt, label: "還款管理" },
+  { href: "/adminmanagebackstage", icon: LayoutDashboard, label: "儀表板" },
+  { href: "/adminmanagebackstage/users", icon: Users, label: "會員管理" },
+  { href: "/adminmanagebackstage/loans", icon: CreditCard, label: "借款審核" },
+  { href: "/adminmanagebackstage/repayments", icon: Receipt, label: "還款管理" },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -27,7 +27,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    window.location.href = getLoginUrl();
+    window.location.href = "/adminmanagebackstage/login";
     return null;
   }
 
@@ -50,7 +50,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       {/* Admin Sidebar */}
       <aside className="hidden md:flex flex-col w-60 border-r border-border bg-navy fixed top-0 bottom-0 left-0 z-30">
         <div className="p-6 border-b border-white/10">
-          <Link href="/admin" className="flex items-center gap-2">
+          <Link href="/adminmanagebackstage" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gold/20 flex items-center justify-center">
               <Zap className="w-4 h-4 text-gold" />
             </div>
