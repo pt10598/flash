@@ -19,7 +19,7 @@ import { getLoginUrl } from "@/const";
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "總覽" },
   { href: "/dashboard/profile", icon: User, label: "個人資料" },
-  { href: "/dashboard/documents", icon: FileText, label: "證件上傳" },
+  { href: "/dashboard/documents", icon: FileText, label: "資料上傳" },
   { href: "/dashboard/loans", icon: CreditCard, label: "我的借款" },
 ];
 

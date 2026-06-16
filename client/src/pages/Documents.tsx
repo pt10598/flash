@@ -354,7 +354,7 @@ export default function DocumentsPage() {
                 <li>• 存摺封面需清楚顯示銀行名稱與帳號</li>
                 <li>• 請勿上傳過期或損毀的證件</li>
                 <li>• 您的資料受到嚴格加密保護，僅供審核使用</li>
-                <li>• 審核通常於 1-2 個工作天內完成</li>
+                <li>審核撥款最快於當天內完成</li>
               </ul>
             </div>
           </div>
