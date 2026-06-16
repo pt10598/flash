@@ -311,22 +311,28 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
 
 export default function AdminUsers() {
   const { data: users, isLoading } = trpc.admin.users.useQuery();
+  const { data: deletedUsers, isLoading: isLoadingDeleted } = trpc.admin.deletedUsers.useQuery();
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "frozen">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "frozen" | "deleted">("all");
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
-  const filtered = users?.filter((u) => {
-    const q = search.toLowerCase();
-    const matchSearch = (
-      u.name?.toLowerCase().includes(q) ||
-      u.email?.toLowerCase().includes(q) ||
-      u.phone?.includes(q) ||
-      u.profile?.fullName?.toLowerCase().includes(q) ||
-      u.profile?.phone?.includes(q)
-    );
-    const matchStatus = statusFilter === "all" || u.status === statusFilter;
-    return matchSearch && matchStatus;
-  }) ?? [];
+  const filtered = statusFilter === "deleted"
+    ? (deletedUsers?.filter((u) => {
+        const q = search.toLowerCase();
+        return u.name?.toLowerCase().includes(q) || u.phone?.includes(q);
+      }) ?? [])
+    : (users?.filter((u) => {
+        const q = search.toLowerCase();
+        const matchSearch = (
+          u.name?.toLowerCase().includes(q) ||
+          u.email?.toLowerCase().includes(q) ||
+          u.phone?.includes(q) ||
+          u.profile?.fullName?.toLowerCase().includes(q) ||
+          u.profile?.phone?.includes(q)
+        );
+        const matchStatus = statusFilter === "all" || u.status === statusFilter;
+        return matchSearch && matchStatus;
+      }) ?? []);
 
   return (
     <AdminLayout>
@@ -349,18 +355,20 @@ export default function AdminUsers() {
               className="pl-10"
             />
           </div>
-          <div className="flex gap-2">
-            {(["all", "active", "frozen"] as const).map((s) => (
+          <div className="flex gap-2 flex-wrap">
+            {(["all", "active", "frozen", "deleted"] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setStatusFilter(s)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
                   statusFilter === s
-                    ? s === "frozen" ? "bg-blue-600 text-white border-blue-600" : "bg-navy text-white border-navy"
+                    ? s === "frozen" ? "bg-blue-600 text-white border-blue-600"
+                    : s === "deleted" ? "bg-red-600 text-white border-red-600"
+                    : "bg-navy text-white border-navy"
                     : "bg-white text-muted-foreground border-border hover:bg-secondary"
                 }`}
               >
-                {s === "all" ? "全部" : s === "active" ? "✅ 正常" : "🔒 已凍結"}
+                {s === "all" ? "全部" : s === "active" ? "✅ 正常" : s === "frozen" ? "🔒 已凍結" : "🗑️ 已刪除"}
               </button>
             ))}
           </div>
@@ -398,11 +406,12 @@ export default function AdminUsers() {
                     </td>
                   </tr>
                 ) : (
-                  filtered.map((u) => (
-                    <tr key={u.id} className="hover:bg-secondary/30 transition-colors">
+                  filtered.map((u: any) => (
+                    <tr key={u.id} className={`hover:bg-secondary/30 transition-colors ${statusFilter === 'deleted' ? 'opacity-60' : ''}`}>
                       <td className="px-5 py-4">
                         <div className="font-medium text-foreground">
                           {u.profile?.fullName || u.name || "未填寫"}
+                          {statusFilter === 'deleted' && <span className="ml-2 text-xs text-red-500">已刪除</span>}
                         </div>
                         <div className="text-xs text-muted-foreground">{u.email}</div>
                       </td>
@@ -410,7 +419,11 @@ export default function AdminUsers() {
                         {u.phone || u.profile?.phone || "—"}
                       </td>
                       <td className="px-5 py-4">
-                        {u.profile?.profileCompleted === "complete" ? (
+                        {statusFilter === 'deleted' ? (
+                          <span className="text-xs text-red-400">
+                            刪除於 {u.deletedAt ? new Date(u.deletedAt).toLocaleDateString("zh-TW") : "—"}
+                          </span>
+                        ) : u.profile?.profileCompleted === "complete" ? (
                           <span className="flex items-center gap-1 text-xs text-emerald-600">
                             <CheckCircle2 className="w-3.5 h-3.5" /> 已完成
                           </span>
@@ -422,8 +435,8 @@ export default function AdminUsers() {
                       </td>
                       <td className="px-5 py-4">
                         {u.document ? (
-                          <span className={`text-xs px-2 py-0.5 rounded-full border ${DOC_STATUS_CONFIG[u.document.verificationStatus]?.color}`}>
-                            {DOC_STATUS_CONFIG[u.document.verificationStatus]?.label}
+                          <span className={`text-xs px-2 py-0.5 rounded-full border ${DOC_STATUS_CONFIG[u.document?.verificationStatus as keyof typeof DOC_STATUS_CONFIG]?.color ?? ''}`}>
+                            {DOC_STATUS_CONFIG[u.document?.verificationStatus as keyof typeof DOC_STATUS_CONFIG]?.label ?? '—'}
                           </span>
                         ) : (
                           <span className="text-xs text-muted-foreground">未上傳</span>
@@ -433,15 +446,17 @@ export default function AdminUsers() {
                         {new Date(u.createdAt).toLocaleDateString("zh-TW")}
                       </td>
                       <td className="px-5 py-4 text-right">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-navy/20 text-navy hover:bg-navy/5"
-                          onClick={() => setSelectedUserId(u.id)}
-                        >
-                          <Eye className="w-3.5 h-3.5 mr-1.5" />
-                          查看
-                        </Button>
+                        {statusFilter !== 'deleted' && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-navy/20 text-navy hover:bg-navy/5"
+                            onClick={() => setSelectedUserId(u.id)}
+                          >
+                            <Eye className="w-3.5 h-3.5 mr-1.5" />
+                            查看
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   ))

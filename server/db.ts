@@ -87,7 +87,8 @@ export async function updateUserLastLoginIp(userId: number, ip: string) {
 export async function deleteUser(userId: number) {
   const db = await getDb();
   if (!db) return;
-  await db.delete(users).where(eq(users.id, userId));
+  // 軟刪除：標記 deletedAt 而非真正刪除
+  await db.update(users).set({ deletedAt: new Date() }).where(eq(users.id, userId));
 }
 
 export async function getUserByPhone(phone: string) {
@@ -130,7 +131,16 @@ export async function getAllUsers() {
 export async function getUsersByRole(role: 'user' | 'admin') {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(users).where(eq(users.role, role)).orderBy(desc(users.createdAt));
+  // 預設只顯示未刪除的用戶
+  const { isNull } = await import('drizzle-orm');
+  return db.select().from(users).where(and(eq(users.role, role), isNull(users.deletedAt))).orderBy(desc(users.createdAt));
+}
+
+export async function getDeletedUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  const { isNotNull } = await import('drizzle-orm');
+  return db.select().from(users).where(and(eq(users.role, 'user'), isNotNull(users.deletedAt))).orderBy(desc(users.deletedAt));
 }
 
 // ─── User Profiles ────────────────────────────────────────────────────────────

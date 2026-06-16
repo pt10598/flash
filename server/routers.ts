@@ -17,6 +17,7 @@ import {
   getUserById,
   getAllUsers,
   getUsersByRole,
+  getDeletedUsers,
   getUserProfile,
   upsertUserProfile,
   getIdDocument,
@@ -336,6 +337,10 @@ export const appRouter = router({
 
     admins: adminProcedure.query(async () => {
       return getUsersByRole('admin');
+    }),
+
+    deletedUsers: adminProcedure.query(async () => {
+      return getDeletedUsers();
     }),
 
     userDetail: adminProcedure

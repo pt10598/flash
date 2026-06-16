@@ -41,7 +41,6 @@ export default function AdminAdmins() {
                 <tr className="border-b border-border bg-secondary/40">
                   <th className="text-left px-5 py-3 font-semibold text-navy">帳號</th>
                   <th className="text-left px-5 py-3 font-semibold text-navy">名稱</th>
-                  <th className="text-left px-5 py-3 font-semibold text-navy">最後登入 IP</th>
                   <th className="text-left px-5 py-3 font-semibold text-navy">加入時間</th>
                   <th className="text-right px-5 py-3 font-semibold text-navy">操作</th>
                 </tr>
@@ -76,9 +75,6 @@ export default function AdminAdmins() {
                         <td className="px-5 py-4 text-muted-foreground">
                           {admin.name || "—"}
                         </td>
-                        <td className="px-5 py-4 text-muted-foreground font-mono text-xs">
-                          {(admin as any).lastLoginIp || "尚未記錄"}
-                        </td>
                         <td className="px-5 py-4 text-muted-foreground text-xs">
                           {new Date(admin.createdAt).toLocaleDateString("zh-TW")}
                         </td>
@@ -96,7 +92,7 @@ export default function AdminAdmins() {
                       </tr>
                       {resetTarget === admin.id && (
                         <tr key={`reset-${admin.id}`} className="bg-secondary/20">
-                          <td colSpan={5} className="px-5 py-4">
+                          <td colSpan={4} className="px-5 py-4">
                             <div className="flex items-center gap-2 max-w-sm">
                               <div className="relative flex-1">
                                 <Input
