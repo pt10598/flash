@@ -73,10 +73,13 @@ export const appRouter = router({
         // 建立 session
         const token = await sdk.createSessionToken(user.openId, { name: user.name ?? "" });
         const cookieOptions = getSessionCookieOptions(ctx.req);
-        ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 365 * 24 * 60 * 60 * 1000 });
+                ctx.res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: 365 * 24 * 60 * 60 * 1000 });
+        // 發送 Email 通知管理員
+        try {
+          await notifyNewUser(input.phone);
+        } catch (e) { console.warn('[Email] notifyNewUser failed:', e); }
         return { success: true, user: { id: user.id, phone: user.phone, name: user.name, role: user.role } };
       }),
-
     login: publicProcedure
       .input(z.object({
         phone: z.string().min(2).max(20),
@@ -162,6 +165,11 @@ export const appRouter = router({
           monthlyIncome: input.monthlyIncome ?? null,
           profileCompleted: "complete",
         });
+        // 發送 Email 通知管理員
+        try {
+          const userObj = await getUserById(ctx.user.id);
+          await notifyProfileUpdated(userObj?.phone ?? '', input.fullName);
+        } catch (e) { console.warn('[Email] notifyProfileUpdated failed:', e); }
         return { success: true };
       }),
   }),
@@ -202,10 +210,14 @@ export const appRouter = router({
           }
         }
 
-        await createOrUpdateIdDocument(updateData);
+                await createOrUpdateIdDocument(updateData);
+        // 發送 Email 通知管理員（身分證上傳）
+        try {
+          const userObj = await getUserById(ctx.user.id);
+          await notifyDocumentUploaded(userObj?.phone ?? '', input.side);
+        } catch (e) { console.warn('[Email] notifyDocumentUploaded failed:', e); }
         return { success: true, url };
       }),
-
     uploadPassbook: protectedProcedure
       .input(z.object({
         base64: z.string(),
