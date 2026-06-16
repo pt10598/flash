@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const ADMIN_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || "gedashu909@gmail.com";
+const ADMIN_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || "dpeo473@gmail.com";
 const FROM_EMAIL = "onboarding@resend.dev";
 
 async function sendNotification(subject: string, html: string) {
