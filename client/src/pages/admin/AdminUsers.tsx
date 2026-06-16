@@ -312,16 +312,20 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
 export default function AdminUsers() {
   const { data: users, isLoading } = trpc.admin.users.useQuery();
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "frozen">("all");
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
   const filtered = users?.filter((u) => {
     const q = search.toLowerCase();
-    return (
+    const matchSearch = (
       u.name?.toLowerCase().includes(q) ||
       u.email?.toLowerCase().includes(q) ||
+      u.phone?.includes(q) ||
       u.profile?.fullName?.toLowerCase().includes(q) ||
       u.profile?.phone?.includes(q)
     );
+    const matchStatus = statusFilter === "all" || u.status === statusFilter;
+    return matchSearch && matchStatus;
   }) ?? [];
 
   return (
@@ -334,15 +338,32 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="relative mb-6 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="搜尋姓名、電話或 Email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
+        {/* Search + Filter */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+          <div className="relative max-w-md flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="搜尋姓名、電話..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2">
+            {(["all", "active", "frozen"] as const).map((s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                  statusFilter === s
+                    ? s === "frozen" ? "bg-blue-600 text-white border-blue-600" : "bg-navy text-white border-navy"
+                    : "bg-white text-muted-foreground border-border hover:bg-secondary"
+                }`}
+              >
+                {s === "all" ? "全部" : s === "active" ? "✅ 正常" : "🔒 已凍結"}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Table */}

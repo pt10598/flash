@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { DashboardLayout } from "./Dashboard";
 import {
@@ -8,12 +9,13 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  Eye,
   FileImage,
   ShieldCheck,
+  Building2,
+  CreditCard,
 } from "lucide-react";
 
-type Side = "front" | "back";
+type UploadSide = "front" | "back" | "passbook";
 
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -35,18 +37,16 @@ const STATUS_CONFIG = {
 };
 
 function UploadCard({
-  side,
   label,
   hint,
   currentUrl,
   onUpload,
   uploading,
 }: {
-  side: Side;
   label: string;
   hint: string;
   currentUrl?: string | null;
-  onUpload: (side: Side, file: File) => void;
+  onUpload: (file: File) => void;
   uploading: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -61,7 +61,7 @@ function UploadCard({
     }
     const url = URL.createObjectURL(file);
     setPreview(url);
-    onUpload(side, file);
+    onUpload(file);
   };
 
   const displayUrl = preview || currentUrl;
@@ -72,15 +72,10 @@ function UploadCard({
         <h3 className="font-display font-semibold text-navy">{label}</h3>
         <p className="text-xs text-muted-foreground mt-1">{hint}</p>
       </div>
-
       <div className="p-5">
         {displayUrl ? (
           <div className="relative rounded-xl overflow-hidden bg-secondary aspect-[16/9]">
-            <img
-              src={displayUrl}
-              alt={label}
-              className="w-full h-full object-contain"
-            />
+            <img src={displayUrl} alt={label} className="w-full h-full object-contain" />
             <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition-colors flex items-center justify-center opacity-0 hover:opacity-100">
               <button
                 onClick={() => inputRef.current?.click()}
@@ -104,15 +99,7 @@ function UploadCard({
             </div>
           </button>
         )}
-
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleFile}
-        />
-
+        <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
         <Button
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
@@ -131,7 +118,13 @@ function UploadCard({
 export default function DocumentsPage() {
   const { data: document, refetch } = trpc.documents.get.useQuery();
   const utils = trpc.useUtils();
-  const [uploading, setUploading] = useState<Side | null>(null);
+  const [uploading, setUploading] = useState<UploadSide | null>(null);
+
+  // 銀行資訊表單
+  const [bankName, setBankName] = useState("");
+  const [bankBranch, setBankBranch] = useState("");
+  const [bankAccount, setBankAccount] = useState("");
+  const [bankSaved, setBankSaved] = useState(false);
 
   const uploadMutation = trpc.documents.upload.useMutation({
     onSuccess: () => {
@@ -139,29 +132,65 @@ export default function DocumentsPage() {
       utils.documents.get.invalidate();
       setUploading(null);
     },
-    onError: (err) => {
-      toast.error(err.message);
-      setUploading(null);
-    },
+    onError: (err) => { toast.error(err.message); setUploading(null); },
   });
 
-  const handleUpload = async (side: Side, file: File) => {
+  const uploadPassbookMutation = trpc.documents.uploadPassbook.useMutation({
+    onSuccess: () => {
+      toast.success("存摺封面上傳成功");
+      utils.documents.get.invalidate();
+      setUploading(null);
+    },
+    onError: (err) => { toast.error(err.message); setUploading(null); },
+  });
+
+  const updateBankInfoMutation = trpc.documents.updateBankInfo.useMutation({
+    onSuccess: () => {
+      toast.success("銀行帳號資訊已儲存");
+      utils.documents.get.invalidate();
+      setBankSaved(true);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const handleUpload = async (side: "front" | "back", file: File) => {
     setUploading(side);
     const base64 = await fileToBase64(file);
     uploadMutation.mutate({ side, base64, mimeType: file.type });
   };
 
+  const handlePassbookUpload = async (file: File) => {
+    setUploading("passbook");
+    const base64 = await fileToBase64(file);
+    uploadPassbookMutation.mutate({ base64, mimeType: file.type });
+  };
+
+  const handleSaveBankInfo = () => {
+    if (!bankName.trim() || !bankAccount.trim()) {
+      toast.error("請填寫銀行名稱和帳號");
+      return;
+    }
+    updateBankInfoMutation.mutate({
+      bankName: bankName.trim(),
+      bankBranch: bankBranch.trim() || undefined,
+      bankAccount: bankAccount.trim(),
+    });
+  };
+
   const status = document?.verificationStatus ?? null;
   const statusConfig = status ? STATUS_CONFIG[status] : null;
 
-  const bothUploaded = !!(document?.frontImageUrl && document?.backImageUrl);
+  // 初始化銀行資訊
+  const existingBankName = (document as any)?.bankName;
+  const existingBankBranch = (document as any)?.bankBranch;
+  const existingBankAccount = (document as any)?.bankAccount;
 
   return (
     <DashboardLayout>
-      <div className="p-6 md:p-8 max-w-2xl">
+      <div className="p-6 md:p-8 max-w-3xl">
         <div className="mb-8">
-          <h1 className="text-2xl font-display font-bold text-navy mb-2">身份證件上傳</h1>
-          <p className="text-muted-foreground">請上傳您的身分證正面與反面，以完成身份驗證</p>
+          <h1 className="text-2xl font-display font-bold text-navy mb-2">資料上傳</h1>
+          <p className="text-muted-foreground">請上傳身分證正反面、銀行存摺封面，並填寫撥款帳號資訊</p>
         </div>
 
         {/* Status banner */}
@@ -177,23 +206,94 @@ export default function DocumentsPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
-          <UploadCard
-            side="front"
-            label="身分證正面"
-            hint="請確保照片清晰，四角完整，無遮擋"
-            currentUrl={document?.frontImageUrl}
-            onUpload={handleUpload}
-            uploading={uploading === "front"}
-          />
-          <UploadCard
-            side="back"
-            label="身分證反面"
-            hint="請確保照片清晰，四角完整，無遮擋"
-            currentUrl={document?.backImageUrl}
-            onUpload={handleUpload}
-            uploading={uploading === "back"}
-          />
+        {/* Section 1: 身分證 */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <ShieldCheck className="w-5 h-5 text-navy" />
+            <h2 className="text-base font-display font-semibold text-navy">身分證件</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <UploadCard
+              label="身分證正面"
+              hint="請確保照片清晰，四角完整，無遮擋"
+              currentUrl={document?.frontImageUrl}
+              onUpload={(file) => handleUpload("front", file)}
+              uploading={uploading === "front"}
+            />
+            <UploadCard
+              label="身分證反面"
+              hint="請確保照片清晰，四角完整，無遮擋"
+              currentUrl={document?.backImageUrl}
+              onUpload={(file) => handleUpload("back", file)}
+              uploading={uploading === "back"}
+            />
+          </div>
+        </div>
+
+        {/* Section 2: 銀行存摺 */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Building2 className="w-5 h-5 text-navy" />
+            <h2 className="text-base font-display font-semibold text-navy">撥款銀行存摺封面</h2>
+          </div>
+          <div className="max-w-sm">
+            <UploadCard
+              label="銀行存摺封面"
+              hint="請上傳存摺封面，需清楚顯示銀行名稱與帳號"
+              currentUrl={(document as any)?.passbookImageUrl}
+              onUpload={handlePassbookUpload}
+              uploading={uploading === "passbook"}
+            />
+          </div>
+        </div>
+
+        {/* Section 3: 銀行帳號資訊 */}
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <CreditCard className="w-5 h-5 text-navy" />
+            <h2 className="text-base font-display font-semibold text-navy">撥款銀行帳號</h2>
+          </div>
+          <div className="card-elegant p-5 max-w-md">
+            {existingBankAccount && !bankSaved ? (
+              <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700">
+                <p className="font-medium">已填寫銀行資訊</p>
+                <p className="text-xs mt-1">{existingBankName} {existingBankBranch ? `（${existingBankBranch}）` : ""} — {existingBankAccount}</p>
+              </div>
+            ) : null}
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-navy mb-1 block">銀行名稱 <span className="text-red-500">*</span></label>
+                <Input
+                  placeholder="例：台灣銀行、玉山銀行"
+                  value={bankName || existingBankName || ""}
+                  onChange={(e) => setBankName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-navy mb-1 block">分行名稱（選填）</label>
+                <Input
+                  placeholder="例：信義分行"
+                  value={bankBranch || existingBankBranch || ""}
+                  onChange={(e) => setBankBranch(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-medium text-navy mb-1 block">銀行帳號 <span className="text-red-500">*</span></label>
+                <Input
+                  placeholder="請輸入完整帳號"
+                  value={bankAccount || existingBankAccount || ""}
+                  onChange={(e) => setBankAccount(e.target.value)}
+                />
+              </div>
+              <Button
+                onClick={handleSaveBankInfo}
+                disabled={updateBankInfoMutation.isPending}
+                className="w-full bg-navy text-white hover:bg-navy/90"
+              >
+                {updateBankInfoMutation.isPending ? "儲存中..." : "儲存銀行資訊"}
+              </Button>
+            </div>
+          </div>
         </div>
 
         {/* Instructions */}
@@ -205,20 +305,14 @@ export default function DocumentsPage() {
               <ul className="text-xs text-muted-foreground space-y-1.5">
                 <li>• 請確保照片清晰可辨，避免模糊、反光或遮擋</li>
                 <li>• 身分證四角必須完整呈現於畫面中</li>
+                <li>• 存摺封面需清楚顯示銀行名稱與帳號</li>
                 <li>• 請勿上傳過期或損毀的證件</li>
-                <li>• 您的證件資料受到嚴格加密保護，僅供身份驗證使用</li>
+                <li>• 您的資料受到嚴格加密保護，僅供審核使用</li>
                 <li>• 審核通常於 1-2 個工作天內完成</li>
               </ul>
             </div>
           </div>
         </div>
-
-        {bothUploaded && !statusConfig && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-success">
-            <CheckCircle2 className="w-4 h-4" />
-            雙證件已上傳完成，等待審核人員確認
-          </div>
-        )}
       </div>
     </DashboardLayout>
   );

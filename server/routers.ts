@@ -203,6 +203,64 @@ export const appRouter = router({
         await createOrUpdateIdDocument(updateData);
         return { success: true, url };
       }),
+
+    uploadPassbook: protectedProcedure
+      .input(z.object({
+        base64: z.string(),
+        mimeType: z.string().default("image/jpeg"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const buffer = Buffer.from(input.base64, "base64");
+        const ext = input.mimeType.split("/")[1] || "jpg";
+        const key = `id-docs/${ctx.user.id}/passbook-${Date.now()}.${ext}`;
+        const { url } = await storagePut(key, buffer, input.mimeType);
+        const existing = await getIdDocument(ctx.user.id);
+        const updateData: InsertIdDocument = {
+          userId: ctx.user.id,
+          passbookImageKey: key,
+          passbookImageUrl: url,
+        };
+        if (existing?.frontImageKey) {
+          updateData.frontImageKey = existing.frontImageKey;
+          updateData.frontImageUrl = existing.frontImageUrl ?? "";
+        }
+        if (existing?.backImageKey) {
+          updateData.backImageKey = existing.backImageKey;
+          updateData.backImageUrl = existing.backImageUrl ?? "";
+        }
+        await createOrUpdateIdDocument(updateData);
+        return { success: true, url };
+      }),
+
+    updateBankInfo: protectedProcedure
+      .input(z.object({
+        bankName: z.string().min(1).max(100),
+        bankBranch: z.string().max(100).optional(),
+        bankAccount: z.string().min(1).max(50),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const existing = await getIdDocument(ctx.user.id);
+        const updateData: InsertIdDocument = {
+          userId: ctx.user.id,
+          bankName: input.bankName,
+          bankBranch: input.bankBranch ?? null,
+          bankAccount: input.bankAccount,
+        };
+        if (existing?.frontImageKey) {
+          updateData.frontImageKey = existing.frontImageKey;
+          updateData.frontImageUrl = existing.frontImageUrl ?? "";
+        }
+        if (existing?.backImageKey) {
+          updateData.backImageKey = existing.backImageKey;
+          updateData.backImageUrl = existing.backImageUrl ?? "";
+        }
+        if (existing?.passbookImageKey) {
+          updateData.passbookImageKey = existing.passbookImageKey;
+          updateData.passbookImageUrl = existing.passbookImageUrl ?? "";
+        }
+        await createOrUpdateIdDocument(updateData);
+        return { success: true };
+      }),
   }),
 
   // ─── Loan Applications ─────────────────────────────────────────────────────

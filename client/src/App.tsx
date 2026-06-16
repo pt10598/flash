@@ -22,6 +22,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminLoans, { AdminLoanDetail } from "./pages/admin/AdminLoans";
 import AdminRepayments from "./pages/admin/AdminRepayments";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminAdmins from "./pages/admin/AdminAdmins";
 
 function Router() {
   return (
@@ -50,6 +51,7 @@ function Router() {
       <Route path="/adminmanagebackstage/users" component={AdminUsers} />
       <Route path="/adminmanagebackstage/loans" component={AdminLoans} />
       <Route path="/adminmanagebackstage/loans/:id" component={AdminLoanDetail} />
+      <Route path="/adminmanagebackstage/admins" component={AdminAdmins} />
       <Route path="/adminmanagebackstage/repayments" component={AdminRepayments} />
 
       {/* Login fallback (when OAuth not configured) */}

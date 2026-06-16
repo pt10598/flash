@@ -1,12 +1,13 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Link, useLocation } from "wouter";
-import { LogOut, Zap, LayoutDashboard, Users, FileText, CreditCard, Receipt } from "lucide-react";
+import { LogOut, Zap, LayoutDashboard, Users, FileText, CreditCard, Receipt, ShieldCheck } from "lucide-react";
 import { getLoginUrl } from "@/const";
 
 const ADMIN_NAV = [
   { href: "/adminmanagebackstage", icon: LayoutDashboard, label: "儀表板" },
   { href: "/adminmanagebackstage/users", icon: Users, label: "會員管理" },
+  { href: "/adminmanagebackstage/admins", icon: ShieldCheck, label: "管理員帳號" },
   { href: "/adminmanagebackstage/loans", icon: CreditCard, label: "借款審核" },
   { href: "/adminmanagebackstage/repayments", icon: Receipt, label: "還款管理" },
 ];
