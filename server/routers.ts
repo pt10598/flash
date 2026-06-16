@@ -49,7 +49,7 @@ export const appRouter = router({
 
     register: publicProcedure
       .input(z.object({
-        phone: z.string().min(8).max(20),
+        phone: z.string().regex(/^09\d{8}$/, "請輸入正確的台灣手機號碼（09 開頭，共 10 碼）"),
         password: z.string().min(6).max(100),
         name: z.string().min(1).max(50).optional(),
       }))
@@ -73,13 +73,18 @@ export const appRouter = router({
 
     login: publicProcedure
       .input(z.object({
-        phone: z.string().min(8).max(20),
+        phone: z.string().min(2).max(20),
         password: z.string().min(1),
+        isAdmin: z.boolean().optional().default(false),
       }))
       .mutation(async ({ ctx, input }) => {
+        // 一般會員登入需驗證手機號碼格式
+        if (!input.isAdmin && !/^09\d{8}$/.test(input.phone)) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "請輸入正確的台灣手機號碼（09 開頭，共 10 碼）" });
+        }
         const user = await getUserByPhone(input.phone);
         if (!user || !user.passwordHash) {
-          throw new TRPCError({ code: "UNAUTHORIZED", message: "手機號碼或密碼錯誤" });
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "帳號或密碼錯誤" });
         }
         const valid = await bcrypt.compare(input.password, user.passwordHash);
         if (!valid) {

@@ -31,7 +31,7 @@ export default function AdminLogin() {
       toast.error("請填寫帳號與密碼");
       return;
     }
-    loginMutation.mutate({ phone: account.trim(), password });
+    loginMutation.mutate({ phone: account.trim(), password, isAdmin: true });
   };
 
   return (

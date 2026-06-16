@@ -46,8 +46,13 @@ export default function Login() {
       toast.error("請填寫手機號碼和密碼");
       return;
     }
+    // 驗證台灣手機號碼格式
+    if (!/^09\d{8}$/.test(phone)) {
+      toast.error("請輸入正確的手機號碼（09 開頭，共 10 碼）");
+      return;
+    }
     if (mode === "login") {
-      loginMutation.mutate({ phone, password });
+      loginMutation.mutate({ phone, password, isAdmin: false });
     } else {
       if (password.length < 6) {
         toast.error("密碼至少需要 6 個字元");
