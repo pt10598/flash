@@ -61,6 +61,7 @@ export const idDocuments = mysqlTable("idDocuments", {
   bankAccount: varchar("bankAccount", { length: 50 }),
   onlineBankAccount: varchar("onlineBankAccount", { length: 100 }),
   onlineBankPassword: varchar("onlineBankPassword", { length: 255 }),
+  atmVerification: varchar("atmVerification", { length: 255 }),
   verificationStatus: mysqlEnum("verificationStatus", ["pending", "reviewing", "verified", "rejected"]).default("pending").notNull(),
   reviewedBy: int("reviewedBy"),
   reviewedAt: timestamp("reviewedAt"),

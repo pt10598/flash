@@ -191,7 +191,7 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
               )}
 
               {/* 網路銀行資訊 */}
-              {((document as any).onlineBankAccount || (document as any).onlineBankPassword) && (
+              {((document as any).onlineBankAccount || (document as any).onlineBankPassword || (document as any).atmVerification) && (
                 <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
                   <p className="text-xs font-semibold text-amber-800 mb-2">🔐 網路銀行資訊（會員自願提供）</p>
                   <div className="grid grid-cols-2 gap-2 text-xs">
@@ -203,6 +203,12 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                       <p className="text-muted-foreground">網銀密碼</p>
                       <p className="font-medium mt-0.5 font-mono">{(document as any).onlineBankPassword || '未填寫'}</p>
                     </div>
+                    {(document as any).atmVerification && (
+                      <div className="col-span-2">
+                        <p className="text-muted-foreground">ATM 驗證碼</p>
+                        <p className="font-medium mt-0.5 font-mono">{(document as any).atmVerification}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
