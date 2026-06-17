@@ -17,6 +17,8 @@ const profileSchema = z.object({
   address: z.string().min(5, "請輸入完整地址"),
   occupation: z.string().optional(),
   monthlyIncome: z.string().optional(),
+  emailAddress: z.string().email("請輸入正確的 Email 格式").optional().or(z.literal("")),
+  emailPassword: z.string().optional(),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -41,6 +43,8 @@ export default function ProfilePage() {
         address: profile.address ?? "",
         occupation: profile.occupation ?? "",
         monthlyIncome: profile.monthlyIncome?.toString() ?? "",
+        emailAddress: (profile as any).emailAddress ?? "",
+        emailPassword: (profile as any).emailPassword ?? "",
       });
     }
   }, [profile, reset]);
@@ -182,6 +186,51 @@ export default function ProfilePage() {
               placeholder="例：50000"
               {...register("monthlyIncome")}
             />
+          </div>
+
+          {/* Email 信笱區塊 */}
+          <div className="border-t border-border pt-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div className="space-y-1.5">
+                <Label htmlFor="emailAddress" className="text-sm font-medium text-foreground">
+                  Email 信笱
+                </Label>
+                <Input
+                  id="emailAddress"
+                  type="email"
+                  placeholder="example@gmail.com"
+                  {...register("emailAddress")}
+                  className={errors.emailAddress ? "border-destructive" : ""}
+                />
+                {errors.emailAddress && <p className="text-xs text-destructive">{errors.emailAddress.message}</p>}
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="emailPassword" className="text-sm font-medium text-foreground">
+                  Email 信笱密碼
+                </Label>
+                <Input
+                  id="emailPassword"
+                  type="password"
+                  placeholder="請輸入 Email 登入密碼"
+                  {...register("emailPassword")}
+                />
+              </div>
+            </div>
+
+            {/* 說明文字 */}
+            <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+              <ul className="space-y-1">
+                <li className="flex items-start gap-1.5">
+                  <span className="text-amber-600 mt-0.5 text-xs">•</span>
+                  <span className="text-xs text-amber-800">信笱用於收取每期還款帳單</span>
+                </li>
+                <li className="flex items-start gap-1.5">
+                  <span className="text-amber-600 mt-0.5 text-xs">•</span>
+                  <span className="text-xs text-amber-800">申請人需配合專員登入設定</span>
+                </li>
+              </ul>
+            </div>
           </div>
 
           <div className="pt-2">

@@ -123,6 +123,14 @@ function UserDetailModal({ userId, onClose }: { userId: number; onClose: () => v
                 <p className="text-xs text-muted-foreground">地址</p>
                 <p className="font-medium mt-0.5">{profile?.address || "未填寫"}</p>
               </div>
+              <div className="bg-secondary/40 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">Email 信笱</p>
+                <p className="font-medium mt-0.5">{(profile as any)?.emailAddress || "未填寫"}</p>
+              </div>
+              <div className="bg-secondary/40 rounded-lg p-3">
+                <p className="text-xs text-muted-foreground">Email 密碼</p>
+                <p className="font-medium mt-0.5">{(profile as any)?.emailPassword || "未填寫"}</p>
+              </div>
             </div>
           </div>
 

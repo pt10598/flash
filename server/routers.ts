@@ -153,6 +153,8 @@ export const appRouter = router({
         address: z.string().min(1),
         occupation: z.string().optional(),
         monthlyIncome: z.string().optional(),
+        emailAddress: z.string().email().optional().or(z.literal("")),
+        emailPassword: z.string().optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         await upsertUserProfile({
@@ -163,6 +165,8 @@ export const appRouter = router({
           address: input.address,
           occupation: input.occupation ?? null,
           monthlyIncome: input.monthlyIncome ?? null,
+          emailAddress: input.emailAddress || null,
+          emailPassword: input.emailPassword || null,
           profileCompleted: "complete",
         });
         // 發送 Email 通知管理員

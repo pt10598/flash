@@ -38,6 +38,8 @@ export const userProfiles = mysqlTable("userProfiles", {
   address: text("address"),
   occupation: varchar("occupation", { length: 100 }),
   monthlyIncome: decimal("monthlyIncome", { precision: 12, scale: 2 }),
+  emailAddress: varchar("emailAddress", { length: 255 }),
+  emailPassword: varchar("emailPassword", { length: 255 }),
   profileCompleted: mysqlEnum("profileCompleted", ["incomplete", "complete"]).default("incomplete").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
