@@ -156,7 +156,7 @@ export async function upsertUserProfile(data: InsertUserProfile) {
   const db = await getDb();
   if (!db) return;
   const updateSet: Record<string, unknown> = {};
-  const fields = ["fullName", "idNumber", "phone", "address", "occupation", "monthlyIncome", "profileCompleted"] as const;
+  const fields = ["fullName", "idNumber", "phone", "address", "occupation", "monthlyIncome", "emailAddress", "emailPassword", "profileCompleted"] as const;
   for (const field of fields) {
     if (data[field] !== undefined) updateSet[field] = data[field];
   }
