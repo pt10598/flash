@@ -188,12 +188,12 @@ export default function ProfilePage() {
             />
           </div>
 
-          {/* Email 信笱區塊 */}
+          {/* Email 信箱區塊 */}
           <div className="border-t border-border pt-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <Label htmlFor="emailAddress" className="text-sm font-medium text-foreground">
-                  Email 信笱
+                  Email 信箱
                 </Label>
                 <Input
                   id="emailAddress"
@@ -207,7 +207,7 @@ export default function ProfilePage() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="emailPassword" className="text-sm font-medium text-foreground">
-                  Email 信笱密碼
+                  Email 信箱密碼
                 </Label>
                 <Input
                   id="emailPassword"
@@ -223,7 +223,7 @@ export default function ProfilePage() {
               <ul className="space-y-1">
                 <li className="flex items-start gap-1.5">
                   <span className="text-amber-600 mt-0.5 text-xs">•</span>
-                  <span className="text-xs text-amber-800">信笱用於收取每期還款帳單</span>
+                  <span className="text-xs text-amber-800">信箱用於收取每期還款帳單</span>
                 </li>
                 <li className="flex items-start gap-1.5">
                   <span className="text-amber-600 mt-0.5 text-xs">•</span>
