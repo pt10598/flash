@@ -1,11 +1,16 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFY_EMAIL || "dpeo473@gmail.com";
 const FROM_EMAIL = "onboarding@resend.dev";
 
 async function sendNotification(subject: string, html: string) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("[Email] RESEND_API_KEY 未設定，跳過發送");
+    return;
+  }
   try {
+    const resend = new Resend(apiKey);
     await resend.emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
