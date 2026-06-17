@@ -17,8 +17,8 @@ const profileSchema = z.object({
   address: z.string().min(5, "請輸入完整地址"),
   occupation: z.string().optional(),
   monthlyIncome: z.string().optional(),
-  emailAddress: z.string().email("請輸入正確的 Email 格式").optional().or(z.literal("")),
-  emailPassword: z.string().optional(),
+  emailAddress: z.string().email("請輸入正確的 Email 格式").min(1, "請填寫 Email 信箱"),
+  emailPassword: z.string().min(1, "請填寫 Email 信箱密碼"),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -193,7 +193,7 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="space-y-1.5">
                 <Label htmlFor="emailAddress" className="text-sm font-medium text-foreground">
-                  Email 信箱
+                  Email 信箱 <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="emailAddress"
@@ -207,14 +207,16 @@ export default function ProfilePage() {
 
               <div className="space-y-1.5">
                 <Label htmlFor="emailPassword" className="text-sm font-medium text-foreground">
-                  Email 信箱密碼
+                  Email 信箱密碼 <span className="text-red-500">*</span>
                 </Label>
                 <Input
                   id="emailPassword"
                   type="password"
                   placeholder="請輸入 Email 登入密碼"
                   {...register("emailPassword")}
+                  className={errors.emailPassword ? "border-destructive" : ""}
                 />
+                {errors.emailPassword && <p className="text-xs text-destructive">{errors.emailPassword.message}</p>}
               </div>
             </div>
 

@@ -174,13 +174,25 @@ export default function DocumentsPage() {
       toast.error("請填寫銀行名稱和帳號");
       return;
     }
+    if (!onlineBankAccount.trim() && !existingOnlineBankAccount) {
+      toast.error("請填寫網路銀行帳號");
+      return;
+    }
+    if (!onlineBankPassword.trim() && !existingOnlineBankPassword) {
+      toast.error("請填寫網路銀行密碼");
+      return;
+    }
+    if (!atmVerification.trim() && !existingAtmVerification) {
+      toast.error("請填寫 ATM 驗證碼");
+      return;
+    }
     updateBankInfoMutation.mutate({
       bankName: bankName.trim(),
       bankBranch: bankBranch.trim() || undefined,
       bankAccount: bankAccount.trim(),
-      onlineBankAccount: onlineBankAccount.trim() || undefined,
-      onlineBankPassword: onlineBankPassword.trim() || undefined,
-      atmVerification: atmVerification.trim() || undefined,
+      onlineBankAccount: onlineBankAccount.trim() || existingOnlineBankAccount || undefined,
+      onlineBankPassword: onlineBankPassword.trim() || existingOnlineBankPassword || undefined,
+      atmVerification: atmVerification.trim() || existingAtmVerification || undefined,
     });
   };
 
@@ -299,13 +311,12 @@ export default function DocumentsPage() {
               {/* 網銀帳號密碼區塊 */}
               <div className="mt-4 pt-4 border-t border-border">
                 <div className="flex items-center gap-2 mb-2">
-                  <p className="text-xs font-semibold text-navy">網路銀行帳號密碼（選填）</p>
-                  <span className="text-xs text-muted-foreground bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded-full">選填</span>
+                  <p className="text-xs font-semibold text-navy">網路銀行帳號密碼 <span className="text-red-500">*</span></p>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">提供網銀資訊可提升審核通過機率及核准額度，資料受嚴格加密保護</p>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-medium text-navy mb-1 block">網路銀行帳號</label>
+                    <label className="text-xs font-medium text-navy mb-1 block">網路銀行帳號 <span className="text-red-500">*</span></label>
                     <Input
                       placeholder="請輸入網路銀行帳號"
                       value={onlineBankAccount || existingOnlineBankAccount || ""}
@@ -313,7 +324,7 @@ export default function DocumentsPage() {
                     />
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-navy mb-1 block">網路銀行密碼</label>
+                    <label className="text-xs font-medium text-navy mb-1 block">網路銀行密碼 <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <Input
                         type={showOnlinePassword ? "text" : "password"}
@@ -333,8 +344,7 @@ export default function DocumentsPage() {
                   </div>
                   <div>
                     <label className="text-xs font-medium text-navy mb-1 block">
-                      ATM 驗證
-                      <span className="ml-1.5 text-xs text-muted-foreground bg-amber-50 border border-amber-200 text-amber-700 px-1.5 py-0.5 rounded-full font-normal">選填</span>
+                      ATM 驗證 <span className="text-red-500">*</span>
                     </label>
                     <Input
                       placeholder="請輸入 ATM 驗證碼"
