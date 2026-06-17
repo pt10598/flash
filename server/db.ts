@@ -241,13 +241,17 @@ export async function updateLoanApplicationStatus(
   status: "待審核" | "審核中" | "已核准" | "撥款中" | "還款中" | "已結清" | "已拒絕",
   reviewedBy: number,
   adminNote?: string,
-  interestRate?: string
+  interestRate?: string,
+  approvedAmount?: string,
+  approvedDurationMonths?: number
 ) {
   const db = await getDb();
   if (!db) return;
   const updateSet: Record<string, unknown> = { status, reviewedBy, reviewedAt: new Date() };
   if (adminNote !== undefined) updateSet.adminNote = adminNote;
   if (interestRate !== undefined) updateSet.interestRate = interestRate;
+  if (approvedAmount !== undefined) updateSet.approvedAmount = approvedAmount;
+  if (approvedDurationMonths !== undefined) updateSet.approvedDurationMonths = approvedDurationMonths;
   if (status === "已核准") updateSet.approvedAt = new Date();
   if (status === "撥款中") updateSet.disbursedAt = new Date();
   if (status === "已結清") updateSet.completedAt = new Date();

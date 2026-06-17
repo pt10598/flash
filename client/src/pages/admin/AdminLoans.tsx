@@ -104,7 +104,7 @@ export function AdminLoanDetail() {
   const utils = trpc.useUtils();
 
   const { data, isLoading } = trpc.admin.loanDetail.useQuery({ loanId });
-  const [statusForm, setStatusForm] = useState({ status: "", adminNote: "", interestRate: "" });
+  const [statusForm, setStatusForm] = useState({ status: "", adminNote: "", interestRate: "", approvedAmount: "", approvedDurationMonths: "" });
   const [showAddRepayment, setShowAddRepayment] = useState(false);
 
   const updateStatusMutation = trpc.admin.updateLoanStatus.useMutation({
@@ -173,6 +173,8 @@ export function AdminLoanDetail() {
               { label: "借款用途", value: loan.purpose },
               { label: "還款方式", value: REPAYMENT_METHOD_LABELS[loan.repaymentMethod] || loan.repaymentMethod },
               { label: "核准利率", value: loan.interestRate ? `${loan.interestRate}%` : "未設定" },
+              { label: "核准額度", value: (loan as any).approvedAmount ? `NT$ ${Number((loan as any).approvedAmount).toLocaleString()}` : "未設定" },
+              { label: "核准期數", value: (loan as any).approvedDurationMonths ? `${(loan as any).approvedDurationMonths} 期` : "未設定" },
               { label: "用戶 ID", value: `#${loan.userId}` },
             ].map((item) => (
               <div key={item.label} className="bg-secondary/40 rounded-lg p-3">
@@ -216,6 +218,33 @@ export function AdminLoanDetail() {
                 />
               </div>
             </div>
+            {/* 核准額度與期數 */}
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-xs font-semibold text-blue-800 mb-2">💰 調整核准額度與期數（可覆蓋申請值）</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">核准額度（NT$）</Label>
+                  <Input
+                    type="number"
+                    placeholder={`申請：${Number(loan.loanAmount).toLocaleString()}`}
+                    value={statusForm.approvedAmount}
+                    onChange={(e) => setStatusForm({ ...statusForm, approvedAmount: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">核准期數（期）</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="360"
+                    placeholder={`申請：${loan.loanDurationMonths}`}
+                    value={statusForm.approvedDurationMonths}
+                    onChange={(e) => setStatusForm({ ...statusForm, approvedDurationMonths: e.target.value })}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-blue-600 mt-1.5">若不填寫，則保留原申請的金額與期數</p>
+            </div>
             <div className="space-y-1.5">
               <Label className="text-sm">審核備註</Label>
               <Input
@@ -231,6 +260,8 @@ export function AdminLoanDetail() {
                 status: (statusForm.status || loan.status) as typeof STATUS_OPTIONS[number],
                 adminNote: statusForm.adminNote || undefined,
                 interestRate: statusForm.interestRate || undefined,
+                approvedAmount: statusForm.approvedAmount || undefined,
+                approvedDurationMonths: statusForm.approvedDurationMonths ? Number(statusForm.approvedDurationMonths) : undefined,
               })}
               disabled={updateStatusMutation.isPending}
             >

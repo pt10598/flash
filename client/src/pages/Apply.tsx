@@ -29,7 +29,7 @@ const REPAYMENT_METHODS = [
 
 const applySchema = z.object({
   loanAmount: z.string().min(1, "請輸入借款金額"),
-  loanDurationMonths: z.number().int().min(1).max(60),
+  loanDurationMonths: z.number().int().min(6).max(120),
   purpose: z.string().min(1, "請選擇借款用途"),
   repaymentMethod: z.enum(["equal_principal_interest", "equal_principal", "bullet"]),
 });
@@ -132,12 +132,12 @@ export default function ApplyPage() {
                   placeholder="50,000"
                   className={`pl-10 ${errors.loanAmount ? "border-destructive" : ""}`}
                   {...register("loanAmount")}
-                  min="10000"
-                  max="1000000"
+                  min="30000"
+                  max="10000000"
                 />
               </div>
               {errors.loanAmount && <p className="text-xs text-destructive">{errors.loanAmount.message}</p>}
-              <p className="text-xs text-muted-foreground">最低 NT$10,000，最高 NT$1,000,000</p>
+              <p className="text-xs text-muted-foreground">最低 NT$30,000，最高 NT$10,000,000</p>
             </div>
           </div>
 
@@ -145,7 +145,7 @@ export default function ApplyPage() {
           <div className="card-elegant p-6">
             <h2 className="font-display font-semibold text-navy mb-4">借款期限</h2>
             <div className="grid grid-cols-4 gap-2">
-              {[3, 6, 12, 24, 36, 48, 60].map((m) => (
+              {[6, 12, 24, 36, 60, 84, 120].map((m) => (
                 <button
                   key={m}
                   type="button"

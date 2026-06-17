@@ -82,6 +82,8 @@ export const loanApplications = mysqlTable("loanApplications", {
   purpose: varchar("purpose", { length: 255 }).notNull(),
   repaymentMethod: mysqlEnum("repaymentMethod", ["equal_principal_interest", "equal_principal", "bullet"]).notNull(),
   interestRate: decimal("interestRate", { precision: 5, scale: 2 }),
+  approvedAmount: decimal("approvedAmount", { precision: 12, scale: 2 }),
+  approvedDurationMonths: int("approvedDurationMonths"),
   status: mysqlEnum("status", ["待審核", "審核中", "已核准", "撥款中", "還款中", "已結清", "已拒絕"]).default("待審核").notNull(),
   adminNote: text("adminNote"),
   reviewedBy: int("reviewedBy"),

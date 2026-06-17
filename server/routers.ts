@@ -297,7 +297,7 @@ export const appRouter = router({
     create: protectedProcedure
       .input(z.object({
         loanAmount: z.string(),
-        loanDurationMonths: z.number().int().min(1).max(60),
+        loanDurationMonths: z.number().int().min(6).max(120),
         purpose: z.string().min(1).max(255),
         repaymentMethod: z.enum(["equal_principal_interest", "equal_principal", "bullet"]),
       }))
@@ -405,6 +405,8 @@ export const appRouter = router({
         status: z.enum(["待審核", "審核中", "已核准", "撥款中", "還款中", "已結清", "已拒絕"]),
         adminNote: z.string().optional(),
         interestRate: z.string().optional(),
+        approvedAmount: z.string().optional(),
+        approvedDurationMonths: z.number().int().min(1).max(360).optional(),
       }))
       .mutation(async ({ ctx, input }) => {
         await updateLoanApplicationStatus(
@@ -412,7 +414,9 @@ export const appRouter = router({
           input.status,
           ctx.user.id,
           input.adminNote,
-          input.interestRate
+          input.interestRate,
+          input.approvedAmount,
+          input.approvedDurationMonths
         );
         return { success: true };
       }),

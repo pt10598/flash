@@ -95,7 +95,7 @@ function PrivacyModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-const LOAN_AMOUNTS = [10000, 50000, 100000, 150000, 200000];
+const LOAN_AMOUNTS = [30000, 50000, 100000, 300000, 500000, 1000000];
 
 export default function Home() {
   const { isAuthenticated, loading } = useAuth();
@@ -144,7 +144,7 @@ export default function Home() {
         <div className="flex items-start justify-between mb-1">
           <div>
             <p className="text-white/70 text-xs mb-1">可申請額度（NT$）</p>
-            <p className="text-white text-3xl font-bold tracking-tight">5,000 - 500,000</p>
+            <p className="text-white text-3xl font-bold tracking-tight">3萬 - 100萬</p>
           </div>
           <div className="text-right">
             <p className="text-white/70 text-xs mb-1">最低日利率</p>
@@ -155,8 +155,8 @@ export default function Home() {
 
         <div className="flex gap-4 mt-4">
           <div>
-            <p className="text-white/60 text-xs">最長借款週期</p>
-            <p className="text-white font-semibold text-sm">91 - 365 天</p>
+            <p className="text-white/60 text-xs">最長借款期數</p>
+            <p className="text-white font-semibold text-sm">6 - 120 期</p>
           </div>
           <div className="w-px bg-white/20" />
           <div>
