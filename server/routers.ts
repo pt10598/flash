@@ -6,7 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { sdk } from "./_core/sdk";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { notifyOwner } from "./_core/notification";
-import { storagePut } from "./storage";
+import { storagePut, storageGetSignedUrl } from "./storage";
 import type { InsertIdDocument } from "../drizzle/schema";
 import bcrypt from "bcryptjs";
 import { notifyNewUser, notifyProfileUpdated, notifyDocumentUploaded, notifyLoanApplication } from "./email";
@@ -361,10 +361,19 @@ export const appRouter = router({
       const regularUsers = await getUsersByRole('user');
       const profiles = await Promise.all(regularUsers.map(u => getUserProfile(u.id)));
       const docs = await Promise.all(regularUsers.map(u => getIdDocument(u.id)));
+      const docsWithSignedUrls = await Promise.all(docs.map(async (doc) => {
+        if (!doc) return null;
+        const [frontUrl, backUrl, passbookUrl] = await Promise.all([
+          doc.frontImageKey ? storageGetSignedUrl(doc.frontImageKey).catch(() => doc.frontImageUrl) : null,
+          doc.backImageKey ? storageGetSignedUrl(doc.backImageKey).catch(() => doc.backImageUrl) : null,
+          (doc as any).passbookImageKey ? storageGetSignedUrl((doc as any).passbookImageKey).catch(() => (doc as any).passbookImageUrl) : null,
+        ]);
+        return { ...doc, frontImageUrl: frontUrl ?? doc.frontImageUrl, backImageUrl: backUrl ?? doc.backImageUrl, passbookImageUrl: passbookUrl ?? (doc as any).passbookImageUrl };
+      }));
       return regularUsers.map((u, i) => ({
         ...u,
         profile: profiles[i] ?? null,
-        document: docs[i] ?? null,
+        document: docsWithSignedUrls[i] ?? null,
       }));
     }),
 
@@ -387,7 +396,16 @@ export const appRouter = router({
           getIdDocument(input.userId),
           getLoanApplicationsByUser(input.userId),
         ]);
-        return { user, profile, document, loans };
+        let docWithSignedUrls = document;
+        if (document) {
+          const [frontUrl, backUrl, passbookUrl] = await Promise.all([
+            document.frontImageKey ? storageGetSignedUrl(document.frontImageKey).catch(() => document.frontImageUrl) : null,
+            document.backImageKey ? storageGetSignedUrl(document.backImageKey).catch(() => document.backImageUrl) : null,
+            (document as any).passbookImageKey ? storageGetSignedUrl((document as any).passbookImageKey).catch(() => (document as any).passbookImageUrl) : null,
+          ]);
+          docWithSignedUrls = { ...document, frontImageUrl: frontUrl ?? document.frontImageUrl, backImageUrl: backUrl ?? document.backImageUrl, passbookImageUrl: passbookUrl ?? (document as any).passbookImageUrl } as any;
+        }
+        return { user, profile, document: docWithSignedUrls, loans };
       }),
 
     allLoans: adminProcedure.query(async () => {

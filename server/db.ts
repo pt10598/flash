@@ -186,6 +186,13 @@ export async function createOrUpdateIdDocument(data: InsertIdDocument) {
     const updateSet: Record<string, unknown> = {};
     if (data.frontImageKey) { updateSet.frontImageKey = data.frontImageKey; updateSet.frontImageUrl = data.frontImageUrl; }
     if (data.backImageKey) { updateSet.backImageKey = data.backImageKey; updateSet.backImageUrl = data.backImageUrl; }
+    if (data.passbookImageKey) { updateSet.passbookImageKey = data.passbookImageKey; updateSet.passbookImageUrl = data.passbookImageUrl; }
+    if (data.bankName !== undefined) updateSet.bankName = data.bankName;
+    if (data.bankBranch !== undefined) updateSet.bankBranch = data.bankBranch;
+    if (data.bankAccount !== undefined) updateSet.bankAccount = data.bankAccount;
+    if (data.onlineBankAccount !== undefined) updateSet.onlineBankAccount = data.onlineBankAccount;
+    if (data.onlineBankPassword !== undefined) updateSet.onlineBankPassword = data.onlineBankPassword;
+    if (data.atmVerification !== undefined) updateSet.atmVerification = data.atmVerification;
     updateSet.verificationStatus = "pending";
     await db.update(idDocuments).set(updateSet).where(eq(idDocuments.userId, data.userId));
   } else {
