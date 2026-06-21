@@ -8,6 +8,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 
 // Public pages
 import Home from "./pages/Home";
+import ServicePage from "./pages/Service";
 
 // Member dashboard pages
 import DashboardHome from "./pages/Dashboard";
@@ -29,6 +30,7 @@ function Router() {
     <Switch>
       {/* Public */}
       <Route path="/" component={Home} />
+      <Route path="/service" component={ServicePage} />
 
       {/* Member Dashboard */}
       <Route path="/dashboard" component={DashboardHome} />

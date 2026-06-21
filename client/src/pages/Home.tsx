@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { useLocation, Link } from "wouter";
-import { Zap, ClipboardList, User, Shield, X } from "lucide-react";
+import { Zap, ClipboardList, User, Shield, X, MessageCircle } from "lucide-react";
 
 function PrivacyModal({ onClose }: { onClose: () => void }) {
   return (
@@ -259,6 +259,12 @@ export default function Home() {
           <div className="flex flex-col items-center py-3 gap-1 cursor-pointer">
             <ClipboardList className="w-5 h-5 text-gray-400" />
             <span className="text-xs text-gray-400">訂單中心</span>
+          </div>
+        </Link>
+        <Link href="/service" className="flex-1">
+          <div className="flex flex-col items-center py-3 gap-1 cursor-pointer">
+            <MessageCircle className="w-5 h-5 text-gray-400" />
+            <span className="text-xs text-gray-400">聯繫客服</span>
           </div>
         </Link>
         <Link href={isAuthenticated ? "/dashboard" : getLoginUrl()} className="flex-1">
