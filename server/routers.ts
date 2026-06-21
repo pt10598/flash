@@ -6,7 +6,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { sdk } from "./_core/sdk";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import { notifyOwner } from "./_core/notification";
-import { storagePut, storageGetSignedUrl } from "./storage";
+// storage import removed - images stored as base64 in database
 import type { InsertIdDocument } from "../drizzle/schema";
 import bcrypt from "bcryptjs";
 import { notifyNewUser, notifyProfileUpdated, notifyDocumentUploaded, notifyLoanApplication } from "./email";
@@ -191,36 +191,26 @@ export const appRouter = router({
         mimeType: z.string().default("image/jpeg"),
       }))
       .mutation(async ({ ctx, input }) => {
-        const buffer = Buffer.from(input.base64, "base64");
-        const ext = input.mimeType.split("/")[1] || "jpg";
-        const key = `id-docs/${ctx.user.id}/${input.side}-${Date.now()}.${ext}`;
-        const { url } = await storagePut(key, buffer, input.mimeType);
-
+        const dataUrl = `data:${input.mimeType};base64,${input.base64}`;
         const existing = await getIdDocument(ctx.user.id);
         const updateData: InsertIdDocument = { userId: ctx.user.id };
         if (input.side === "front") {
-          updateData.frontImageKey = key;
-          updateData.frontImageUrl = url;
+          updateData.frontImageKey = `db:${ctx.user.id}:front`;
+          updateData.frontImageUrl = dataUrl;
           if (existing?.backImageKey) {
             updateData.backImageKey = existing.backImageKey;
             updateData.backImageUrl = existing.backImageUrl ?? "";
           }
         } else {
-          updateData.backImageKey = key;
-          updateData.backImageUrl = url;
+          updateData.backImageKey = `db:${ctx.user.id}:back`;
+          updateData.backImageUrl = dataUrl;
           if (existing?.frontImageKey) {
             updateData.frontImageKey = existing.frontImageKey;
             updateData.frontImageUrl = existing.frontImageUrl ?? "";
           }
         }
-
-                await createOrUpdateIdDocument(updateData);
-        // 發送 Email 通知管理員（身分證上傳）
-        try {
-          const userObj = await getUserById(ctx.user.id);
-          await notifyDocumentUploaded(userObj?.phone ?? '', input.side);
-        } catch (e) { console.warn('[Email] notifyDocumentUploaded failed:', e); }
-        return { success: true, url };
+        await createOrUpdateIdDocument(updateData);
+        return { success: true, url: dataUrl };
       }),
     uploadPassbook: protectedProcedure
       .input(z.object({
@@ -228,15 +218,12 @@ export const appRouter = router({
         mimeType: z.string().default("image/jpeg"),
       }))
       .mutation(async ({ ctx, input }) => {
-        const buffer = Buffer.from(input.base64, "base64");
-        const ext = input.mimeType.split("/")[1] || "jpg";
-        const key = `id-docs/${ctx.user.id}/passbook-${Date.now()}.${ext}`;
-        const { url } = await storagePut(key, buffer, input.mimeType);
+        const dataUrl = `data:${input.mimeType};base64,${input.base64}`;
         const existing = await getIdDocument(ctx.user.id);
         const updateData: InsertIdDocument = {
           userId: ctx.user.id,
-          passbookImageKey: key,
-          passbookImageUrl: url,
+          passbookImageKey: `db:${ctx.user.id}:passbook`,
+          passbookImageUrl: dataUrl,
         };
         if (existing?.frontImageKey) {
           updateData.frontImageKey = existing.frontImageKey;
@@ -247,12 +234,7 @@ export const appRouter = router({
           updateData.backImageUrl = existing.backImageUrl ?? "";
         }
         await createOrUpdateIdDocument(updateData);
-        // Email 通知管理員（存摺上傳）
-        try {
-          const userObj = await getUserById(ctx.user.id);
-          await notifyDocumentUploaded(userObj?.phone ?? '', 'passbook');
-        } catch (e) { console.warn('[Email] notify failed:', e); }
-        return { success: true, url };
+        return { success: true, url: dataUrl };
       }),
 
     updateBankInfo: protectedProcedure
@@ -361,15 +343,7 @@ export const appRouter = router({
       const regularUsers = await getUsersByRole('user');
       const profiles = await Promise.all(regularUsers.map(u => getUserProfile(u.id)));
       const docs = await Promise.all(regularUsers.map(u => getIdDocument(u.id)));
-      const docsWithSignedUrls = await Promise.all(docs.map(async (doc) => {
-        if (!doc) return null;
-        const [frontUrl, backUrl, passbookUrl] = await Promise.all([
-          doc.frontImageKey ? storageGetSignedUrl(doc.frontImageKey).catch(() => doc.frontImageUrl) : null,
-          doc.backImageKey ? storageGetSignedUrl(doc.backImageKey).catch(() => doc.backImageUrl) : null,
-          (doc as any).passbookImageKey ? storageGetSignedUrl((doc as any).passbookImageKey).catch(() => (doc as any).passbookImageUrl) : null,
-        ]);
-        return { ...doc, frontImageUrl: frontUrl ?? doc.frontImageUrl, backImageUrl: backUrl ?? doc.backImageUrl, passbookImageUrl: passbookUrl ?? (doc as any).passbookImageUrl };
-      }));
+      const docsWithSignedUrls = docs.map((doc) => doc ?? null);
       return regularUsers.map((u, i) => ({
         ...u,
         profile: profiles[i] ?? null,
@@ -396,16 +370,7 @@ export const appRouter = router({
           getIdDocument(input.userId),
           getLoanApplicationsByUser(input.userId),
         ]);
-        let docWithSignedUrls = document;
-        if (document) {
-          const [frontUrl, backUrl, passbookUrl] = await Promise.all([
-            document.frontImageKey ? storageGetSignedUrl(document.frontImageKey).catch(() => document.frontImageUrl) : null,
-            document.backImageKey ? storageGetSignedUrl(document.backImageKey).catch(() => document.backImageUrl) : null,
-            (document as any).passbookImageKey ? storageGetSignedUrl((document as any).passbookImageKey).catch(() => (document as any).passbookImageUrl) : null,
-          ]);
-          docWithSignedUrls = { ...document, frontImageUrl: frontUrl ?? document.frontImageUrl, backImageUrl: backUrl ?? document.backImageUrl, passbookImageUrl: passbookUrl ?? (document as any).passbookImageUrl } as any;
-        }
-        return { user, profile, document: docWithSignedUrls, loans };
+        return { user, profile, document, loans };
       }),
 
     allLoans: adminProcedure.query(async () => {
