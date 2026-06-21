@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Zap, Phone, Lock, User, Eye, EyeOff, ArrowLeft } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -198,7 +198,7 @@ export default function Login() {
         <p className="text-white/40 text-xs text-center leading-relaxed">
           {mode === "register"
             ? "註冊即表示您同意閃電貸的服務條款與隱私政策"
-            : "忘記密碼？請聯繫客服協助重設"}
+            : <>忘記密碼？請<Link href="/service" className="text-white/70 underline underline-offset-2 hover:text-white transition-colors">聯繫客服</Link>協助重設</>}
         </p>
       </div>
 
